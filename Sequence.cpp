@@ -3,31 +3,34 @@
 #include <string>
 #include <fstream>
 #include <vector>
-
+#include<algorithm>
+#include<string.h>
 using namespace std;
-
-
-Sequence::Sequence(string filename)
+string k;
+Sequence::Sequence( string filename)
 {
-  fin.open(filename,ios::in|ios::app);
+
+  
+  fin.open(filename.c_str(),ios::in|ios::app);
+  if(!fin) {cout<<"failed";}
   char a ,last='h';
   int count =1;
   while(fin.get(a))
   {
-  
-   if(a=='C') sum_C++;  
-   if(a=='G') sum_G++;
-   if(a=='A') sum_A++; 
-   if(a=='T') sum_T++;
-   
-
-   
+   switch(a)
+   { 
+   case 'C': sum_C++;k += 'C';data.push_back(a);break;  
+   case 'G': sum_G++;k += 'G';data.push_back(a);break;
+   case 'A': sum_A++;k += 'A';data.push_back(a);break;
+   case 'T': sum_T++;k += 'T';data.push_back(a);break;
+   default:  break;
+   }
    if(last==a) count++; else count=1;
    if(longest<count) {longest=count;longest_base=a;}
    last=a;
-   data.push_back(a);
-  }
   
+  }
+  fin.close();
 }
 
 
@@ -52,41 +55,63 @@ string Sequence::longestConsecutive()
    string c;
    c.assign(longest,longest_base);
    return c;
- 
+   
 }
-string Sequence::longestRepeated()
+
+int  judge(const void *m,const void *n)
 {
-   int longest_begin=0;
-   int len=longest-1;
- 
- 
- for(int a_begin=0;a_begin<data.size();a_begin++)
- {
-  
-      for(int b_begin=a_begin+1;b_begin<data.size();b_begin++)
-      {
-         for(int i=0;i<=len;i++)
-         {
-            if( ((b_begin)+i)<data.size()  && (a_begin+i)<data.size() )
-              {
-               if(data[a_begin+i]==data[b_begin+i])  
-               {
-                 if(i==len) {len=i+1;longest_begin=b_begin;}
-               }
-               else {break;}
-              }
-         }
-      }
- }
- 
+   char **pm=(char**)m;
+   char **pn=(char**)n;
+   return strcmp(*pm,*pn);
 
-
- string l="";
- for(int i=0;i<len;i++)
- {
-   l=l+data[longest_begin+i];
- }
- 
- return l;
 }
+
+
+int comlength(char *m,char *n)
+{
+  int i=0;
+  while(*m && (*m++ == *n++))
+  {i++;}
+  return i;
+}
+
+
+char a[1200000],*b[1200000];
+string Sequence::longestRepeated()
+{ 
+  
+   
+  
+   
+   const  int maxlen=k.length();
+   
+   for (int i=0;i<maxlen;++i)
+   {
+     a[i]=k[i];b[i]=&a[i];
+   }
+  
+   
+   
+   b[maxlen]=0;b[maxlen+1]=0;
+   qsort(b,maxlen,sizeof(char*),judge);
+  
+  
+
+   int maxi=0,len=0,z=-1;
+   for(int i=1;i<maxlen;++i){
+     len=comlength(b[i-1],b[i]);
+     if(len>z) {z=len;maxi=i;}
+   }
+  
+
+
+  string str;
+  for(int i=0;i<z;++i)
+  str=str+b[maxi][i];
+  return str;
+  
+ 
+ 
+}
+
 
